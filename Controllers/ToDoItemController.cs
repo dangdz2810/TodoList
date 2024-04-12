@@ -53,6 +53,7 @@ namespace Authentication.Controllers
         }
 
         [HttpPost]
+        [JwtAuthorize("user")]
         public async Task<IActionResult> CreateAsync(ToDoItem item)
         {
             var newItem = await _todoItemService.CreateAsync(item);
@@ -60,6 +61,7 @@ namespace Authentication.Controllers
         }
 
         [HttpPut("{id}")]
+        [JwtAuthorize("user")]
         public async Task<IActionResult> UpdateAsync(int id, ToDoItem item)
         {
             if (id != item.Id)
@@ -80,6 +82,7 @@ namespace Authentication.Controllers
         }
 
         [HttpDelete("{id}")]
+        [JwtAuthorize("admin")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             try
