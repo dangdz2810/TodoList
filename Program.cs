@@ -69,7 +69,7 @@ builder.Services.AddSwaggerGen(c =>
     };
     c.AddSecurityRequirement(securityRequirement);
 });
-
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

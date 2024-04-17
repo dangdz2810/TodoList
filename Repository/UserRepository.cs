@@ -1,8 +1,11 @@
-﻿using Authentication.Data;
+﻿using Authentication.Dao.Specifications.UserSpec;
+using Authentication.Dao.UnitofWork;
+using Authentication.Data;
 using Authentication.Entity;
 using Authentication.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,11 +17,13 @@ namespace Authentication.Repository
     {
         private readonly DataContext _context;
         private readonly IConfiguration _config;
+        private readonly IUnitofWork _unitofwork;
 
-        public UserRepository(DataContext context, IConfiguration configuration)
+        public UserRepository(DataContext context, IConfiguration configuration, IUnitofWork unitofwork)
         {
             _context = context;
             _config = configuration;
+            _unitofwork = unitofwork;
         }
 
         public async Task<User?> Create(RegisterViewModel registerViewModel)
@@ -30,29 +35,40 @@ namespace Authentication.Repository
                 Email = registerViewModel.Email,
                 RoleId = 2
             };
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
+            await _unitofwork.Repository<User>().CreateAsync(newUser);
+            await _unitofwork.Complete();
+            //_context.Users.Add(newUser);
+            //await _context.SaveChangesAsync();
             return newUser;
         }
 
         public async Task<User?> GetByEmail(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
+            var userByEmail = await _unitofwork.Repository<User>().GetEntityWithSpecAsync(new GetUserByEmail(email));
+            //from user in await _unitofwork.Repository<User>().GetAllAsync()
+            //              where user.Email == email
+            //              select user;
+            return (User?)userByEmail;
         }
 
         public async Task<User?> GetById(int id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _unitofwork.Repository<User>().GetByIdAsync(id);
         }
 
-        public Task<User?> GetByUsername(string username)
+        public async Task<User?> GetByUsername(string username)
         {
-            return _context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(username));
+            var userByUsername = await _unitofwork.Repository<User>().GetEntityWithSpecAsync(new GetUserByUserName(username));
+                              //from user in await _unitofwork.Repository<User>().GetAllAsync()
+                              //where user.UserName == username
+                              //select user;
+            return (User?)userByUsername;
+            //return _context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(username));
         }
 
         public async Task<string> Login(LoginViewModel loginViewModel)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginViewModel.Email);
+            var user = await _unitofwork.Repository<User>().GetEntityWithSpecAsync(new GetUserByEmail(loginViewModel.Email));
             //var roleId = await _context.Roles.Where(r => r.Id == user.RoleId).Select(r => r.Name).FirstOrDefaultAsync();
             if (user != null && BCrypt.Net.BCrypt.Verify(loginViewModel.Password, user.Password))
             {

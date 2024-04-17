@@ -24,7 +24,7 @@ namespace Authentication.Services
             }
             var existingTodoItemByName = await _todoItemRepository
                         .GetByTodoItemname(item.Name ?? "");
-            if (existingTodoItemByName == null)
+            if (existingTodoItemByName != null)
             {
                 throw new BadRequestException("TodoItem name is exist!!");
             }
