@@ -3,6 +3,7 @@ using Authentication.Dao.UnitofWork;
 using Authentication.Data;
 using Authentication.Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Authentication.Repository
 {
@@ -39,15 +40,22 @@ namespace Authentication.Repository
             await _unitofWork.Complete();
         }
 
-        public async Task<List<ToDoItem>> GetAllAsync()
+        public async Task<(List<ToDoItem> items, int totalCount)> GetAllAsync(int pageIndex, int pageSize)
         {
-            //return await _context.ToDoItems.ToListAsync();
-            return (List<ToDoItem>)await _unitofWork.Repository<ToDoItem>().GetAllAsync();
+            var allItems = await _unitofWork.Repository<ToDoItem>().GetAllAsync();
+
+            var totalCount = allItems.Count;
+            var items = allItems.Skip((pageIndex - 1) * pageSize)
+                                .Take(pageSize)
+                                .ToList();
+
+            return (items, totalCount);
         }
 
         public async Task<List<ToDoItem>> GetAllByUserIdAsync(int userId)
         {
-            var TodoItemByUser = await _unitofWork.Repository<ToDoItem>().GetAllWithSpecAsync(new GetTodoItemByUserIdSpec(userId));
+            Expression<Func<ToDoItem, bool>> filters = td => td.UserId == userId;
+            var TodoItemByUser = await _unitofWork.Repository<ToDoItem>().GetAll(filter: filters );
             return (List<ToDoItem>)TodoItemByUser;
         }
 
@@ -58,7 +66,8 @@ namespace Authentication.Repository
 
         public async Task<ToDoItem?> GetByTodoItemname(string name)
         {
-            return await _unitofWork.Repository<ToDoItem>().GetEntityWithSpecAsync(new GetTodoItemNameSpec(name));
+            Expression<Func<ToDoItem, bool>> filter = td => td.Name == name;
+            return await _unitofWork.Repository<ToDoItem>().Get(filter);
         }
 
         public async Task<ToDoItem> UpdateAsync(int id, ToDoItem item)

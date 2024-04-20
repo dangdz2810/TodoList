@@ -20,14 +20,19 @@ namespace Authentication.Controllers
         }
         [HttpGet]
         [JwtAuthorize("user","admin")]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync(int pageIndex = 1, int pageSize = 10)
         {
-            List<ToDoItem> toDoItems = await _todoItemService.GetAllAsync();
-            if (toDoItems.Count() == 0)
+            var result = await _todoItemService.GetAllAsync(pageIndex, pageSize);
+            if (result.items.Count == 0)
             {
                 return NotFound();
             }
-            return Ok(toDoItems);
+            var response = new
+            {
+                TotalCount = result.totalCount,
+                Items = result.items
+            };
+            return Ok(response);
         }
 
         [HttpGet("todoItemByUser/{userId}")]

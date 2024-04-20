@@ -43,9 +43,9 @@ namespace Authentication.Services
             await _todoItemRepository.DeleteAsync(id);
         }
 
-        public async Task<List<ToDoItem>> GetAllAsync()
+        public async Task<(List<ToDoItem> items, int totalCount)> GetAllAsync(int pageIndex, int pageSize)
         {
-            return await _todoItemRepository.GetAllAsync();
+            return await _todoItemRepository.GetAllAsync(pageIndex, pageSize);
         }
 
         public async Task<List<ToDoItem>> GetAllByUserIdAsync(int userId)

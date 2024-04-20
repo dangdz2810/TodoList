@@ -1,8 +1,9 @@
 ﻿using Authentication.Data;
 using Authentication.Repository.GenericRepositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections;
-
+using System.Data.Entity;
 namespace Authentication.Dao.UnitofWork
 {
     public class UnitofWork : IUnitofWork
@@ -22,18 +23,19 @@ namespace Authentication.Dao.UnitofWork
             return 1;
         }
 
-        public IGenericRepository<TEntity>? Repository<TEntity>() where TEntity : class
+        public IGenericRepository<T>? Repository<T>() where T : class
         {
             if(_repositories == null)
             {
                 _repositories = new Hashtable();
             }
-            var type = typeof(TEntity).Name;
+            var type = typeof(T).Name;
             if(!_repositories.ContainsKey(type)) {
-                var repo = new GenericRepository<TEntity>(_context);
+                var dbSet = _context.Set<T>();
+                var repo = new GenericRepository<T>(dbSet);
                 _repositories.Add(type, repo);
             }
-            return _repositories[type] as IGenericRepository<TEntity>;
+            return _repositories[type] as IGenericRepository<T>;
         }
     }
 }

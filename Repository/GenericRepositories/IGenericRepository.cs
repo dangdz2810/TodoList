@@ -1,4 +1,5 @@
 ﻿using Authentication.Dao.Specifications;
+using System.Linq.Expressions;
 
 namespace Authentication.Repository.GenericRepositories
 {
@@ -10,11 +11,14 @@ namespace Authentication.Repository.GenericRepositories
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);
 
-        //Có điền kiện
-        Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec);
-        Task<T> GetEntityWithSpecAsync(ISpecification<T> spec);
-        Task<int> GetCountWithSpecAsync(ISpecification<T> spec);
-        Task DeleteRange(IReadOnlyList<T> entity);
+        ////Có điền kiện
+        //Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec);
+        //Task<T> GetEntityWithSpecAsync(ISpecification<T> spec);
+        //Task<int> GetCountWithSpecAsync(ISpecification<T> spec);
+        //void DeleteRange(IReadOnlyList<T> entity);
+
+        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, string? includeProperties = null);
+        Task<T> Get(Expression<Func<T, bool>>? filter = null, string includeProperties = "");
 
     }
 }

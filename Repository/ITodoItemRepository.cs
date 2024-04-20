@@ -5,7 +5,7 @@ namespace Authentication.Repository
     public interface ITodoItemRepository
     {
         Task<ToDoItem> GetByIdAsync(int id);
-        Task<List<ToDoItem>> GetAllAsync();
+        Task<(List<ToDoItem> items, int totalCount)> GetAllAsync(int pageIndex, int pageSize);
         Task<ToDoItem?> GetByTodoItemname(string name);
         Task<ToDoItem> CreateAsync(ToDoItem item);
         Task<ToDoItem> UpdateAsync(int id, ToDoItem item);
